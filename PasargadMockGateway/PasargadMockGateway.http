@@ -1,0 +1,6 @@
+@PasargadMockGateway_HostAddress = http://localhost:5151
+
+GET {{PasargadMockGateway_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

@@ -1,0 +1,304 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+		"name": "Pasargad Mock Gateway",
+		"description": "کالکشن تست سرویس‌های درگاه پرداخت پاسارگاد",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Get Token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"Username\": \"ipgTestUser\",\n    \"Password\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/token/getToken",
+							"host": ["{{baseUrl}}"],
+							"path": ["token", "getToken"]
+						},
+						"description": "دریافت توکن دسترسی"
+					}
+				}
+			]
+		},
+		{
+			"name": "Payment",
+			"item": [
+				{
+					"name": "Purchase",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"ServiceCode\": \"8\",\n    \"ServiceType\": \"PURCHASE\",\n    \"PaymentCode\": \"123456\",\n    \"InvoiceNumber\": \"INV-001\",\n    \"Amount\": 1000,\n    \"RedirectUrl\": \"https://your-site.com/callback\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/payment/purchase",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "payment", "purchase"]
+						},
+						"description": "درخواست پرداخت"
+					}
+				},
+				{
+					"name": "Confirm Transaction",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"Invoice\": \"INV-001\",\n    \"TerminalCode\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/payment/confirm-transactions",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "payment", "confirm-transactions"]
+						},
+						"description": "تایید تراکنش"
+					}
+				},
+				{
+					"name": "Verify Transaction",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"Invoice\": \"INV-001\",\n    \"TerminalCode\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/payment/verify-transactions",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "payment", "verify-transactions"]
+						},
+						"description": "تاییدیه تراکنش"
+					}
+				},
+				{
+					"name": "Verify Payment",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"Invoice\": \"INV-001\",\n    \"TerminalCode\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/payment/verify-payment",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "payment", "verify-payment"]
+						},
+						"description": "تاییدیه پرداخت با اطلاعات تکمیلی"
+					}
+				},
+				{
+					"name": "Reverse Transaction",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"Invoice\": \"INV-001\",\n    \"TerminalCode\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/payment/reverse-transactions",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "payment", "reverse-transactions"]
+						},
+						"description": "برگشت تراکنش"
+					}
+				},
+				{
+					"name": "Payment Inquiry",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"InvoiceId\": \"INV-001\",\n    \"TerminalCode\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/payment/payment-inquiry",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "payment", "payment-inquiry"]
+						},
+						"description": "استعلام وضعیت تراکنش"
+					}
+				},
+				{
+					"name": "Payment Inquiry V2",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"InvoiceId\": \"INV-001\",\n    \"TerminalCode\": \"123456\",\n    \"HashedCardNumber\": \"ba6567ba6c9fc28e1434b838a91028a4250185fb6dd99d62c0392538a087c8be\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/payment/payment-inquiryv2",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "payment", "payment-inquiryv2"]
+						},
+						"description": "استعلام وضعیت تراکنش با شماره کارت هش شده"
+					}
+				},
+				{
+					"name": "Refund Transaction",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"Invoice\": \"INV-001\",\n    \"TerminalCode\": \"123456\",\n    \"Type\": \"RefundOnline\",\n    \"Amount\": 1000\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/payment/refund-transactions",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "payment", "refund-transactions"]
+						},
+						"description": "برگشت از خرید"
+					}
+				},
+				{
+					"name": "Confirm Pin",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"CardNumber\": \"6037701234567890\",\n    \"ExpireMonth\": \"12\",\n    \"ExpireYear\": \"99\",\n    \"Cvv2\": \"1234\",\n    \"Pin2\": \"123456\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/payment/inquiry-confirm-pin",
+							"host": ["{{baseUrl}}"],
+							"path": ["api", "payment", "inquiry-confirm-pin"]
+						},
+						"description": "تایید رمز کارت"
+					}
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [""]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [""]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:4000",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "your-token-here",
+			"type": "string"
+		}
+	]
+} 
