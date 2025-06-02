@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PasargadMockGateway")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6f74f402ce09f9d7ae5b741df260543a96aeee36")]
 [assembly: System.Reflection.AssemblyProductAttribute("PasargadMockGateway")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PasargadMockGateway")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

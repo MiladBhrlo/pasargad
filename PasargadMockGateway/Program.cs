@@ -1,4 +1,5 @@
 using PasargadMockGateway.Models;
+using PasargadMockGateway.Services;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -68,6 +69,9 @@ builder.Services.AddAuthentication("Bearer")
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? "YourSecretKeyHere"))
         };
     });
+
+// اضافه کردن سرویس تراکنش
+builder.Services.AddSingleton<TransactionService>();
 
 var app = builder.Build();
 
@@ -176,7 +180,7 @@ app.MapPost("/token/getToken", (TokenRequest request) =>
 .WithOpenApi();
 
 // سرویس خرید و خرید شناسه دار
-app.MapPost("/api/payment/purchase", [Authorize] (PurchaseRequest request) =>
+app.MapPost("/api/payment/purchase", [Authorize] (PurchaseRequest request, TransactionService transactionService) =>
 {
     // در محیط واقعی، اینجا باید اعتبارسنجی‌های لازم انجام شود
     if (request.ServiceCode != "8" || request.ServiceType != "PURCHASE")
@@ -201,6 +205,16 @@ app.MapPost("/api/payment/purchase", [Authorize] (PurchaseRequest request) =>
     // تولید یک شناسه یکتا برای URL
     var urlId = Guid.NewGuid().ToString("N");
     
+    // ذخیره اطلاعات تراکنش
+    transactionService.AddTransaction(urlId, new TransactionInfo
+    {
+        PaymentCode = request.PaymentCode,
+        Invoice = request.Invoice,
+        TerminalNumber = request.TerminalNumber.ToString(),
+        Amount = request.Amount,
+        CallbackApi = request.CallbackApi
+    });
+    
     // ساخت URL درگاه پرداخت
     var baseUrl = builder.Configuration["BaseUrl"] ?? "http://localhost:4000";
     var paymentUrl = $"{baseUrl}/{urlId}";
@@ -219,6 +233,20 @@ app.MapPost("/api/payment/purchase", [Authorize] (PurchaseRequest request) =>
     return Results.Ok(response);
 })
 .WithName("Purchase")
+.WithOpenApi();
+
+// صفحه درگاه پرداخت
+app.MapGet("/{urlId}", (string urlId, TransactionService transactionService) =>
+{
+    var transaction = transactionService.GetTransaction(urlId);
+    if (transaction == null)
+    {
+        return Results.NotFound();
+    }
+
+    return Results.Redirect($"/Payment?token={transaction.PaymentCode}&invoiceNumber={transaction.Invoice}&terminalCode={transaction.TerminalNumber}&amount={transaction.Amount}&redirectUrl={transaction.CallbackApi}");
+})
+.WithName("PaymentGateway")
 .WithOpenApi();
 
 // سرویس تایید تراکنش

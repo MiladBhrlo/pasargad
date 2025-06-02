@@ -52,7 +52,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"ServiceCode\": \"8\",\n    \"ServiceType\": \"PURCHASE\",\n    \"PaymentCode\": \"123456\",\n    \"InvoiceNumber\": \"INV-001\",\n    \"Amount\": 1000,\n    \"RedirectUrl\": \"https://your-site.com/callback\"\n}"
+							"raw": "{\n    \"ServiceCode\": \"8\",\n    \"ServiceType\": \"PURCHASE\",\n    \"PaymentCode\": \"123456\",\n    \"Invoice\": \"INV-001\",\n    \"Amount\": 1000,\n    \"CallbackApi\": \"https://your-site.com/callback\",\n    \"TerminalNumber\": 123456\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/payment/purchase",
@@ -60,7 +60,32 @@
 							"path": ["api", "payment", "purchase"]
 						},
 						"description": "درخواست پرداخت"
-					}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has valid structure\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('ResultCode', 0);",
+									"    pm.expect(jsonData).to.have.property('Data');",
+									"    pm.expect(jsonData.Data).to.have.property('UrlId');",
+									"    pm.expect(jsonData.Data).to.have.property('Url');",
+									"});",
+									"",
+									"// ذخیره URL برای استفاده در تست‌های بعدی",
+									"var jsonData = pm.response.json();",
+									"pm.variables.set('paymentUrl', jsonData.Data.Url);",
+									"pm.variables.set('urlId', jsonData.Data.UrlId);"
+								]
+							}
+						}
+					]
 				},
 				{
 					"name": "Confirm Transaction",
@@ -78,7 +103,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"Invoice\": \"INV-001\",\n    \"TerminalCode\": \"123456\"\n}"
+							"raw": "{\n    \"Invoice\": \"INV-001\",\n    \"UrlId\": \"{{urlId}}\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/payment/confirm-transactions",
@@ -86,7 +111,27 @@
 							"path": ["api", "payment", "confirm-transactions"]
 						},
 						"description": "تایید تراکنش"
-					}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has valid structure\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('ResultCode', 0);",
+									"    pm.expect(jsonData).to.have.property('Data');",
+									"    pm.expect(jsonData.Data).to.have.property('Invoice');",
+									"    pm.expect(jsonData.Data).to.have.property('ReferenceNumber');",
+									"    pm.expect(jsonData.Data).to.have.property('TrackId');"
+								]
+							}
+						}
+					]
 				},
 				{
 					"name": "Verify Transaction",
