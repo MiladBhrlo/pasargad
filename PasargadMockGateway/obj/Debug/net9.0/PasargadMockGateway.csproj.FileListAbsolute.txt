@@ -44,3 +44,4 @@ C:\Users\lenovo\source\repos\pasargad\PasargadMockGateway\obj\Debug\net9.0\Pasar
 C:\Users\lenovo\source\repos\pasargad\PasargadMockGateway\obj\Debug\net9.0\ref\PasargadMockGateway.dll
 C:\Users\lenovo\source\repos\pasargad\PasargadMockGateway\obj\Debug\net9.0\PasargadMockGateway.RazorAssemblyInfo.cache
 C:\Users\lenovo\source\repos\pasargad\PasargadMockGateway\obj\Debug\net9.0\PasargadMockGateway.RazorAssemblyInfo.cs
+C:\Users\lenovo\source\repos\pasargad\PasargadMockGateway\obj\Debug\net9.0\PasargadMockGateway.sourcelink.json

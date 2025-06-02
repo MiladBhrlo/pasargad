@@ -29,13 +29,122 @@
 							"path": ["token", "getToken"]
 						},
 						"description": "دریافت توکن دسترسی"
-					}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has valid structure\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('ResultCode', 0);",
+									"    pm.expect(jsonData).to.have.property('Token');",
+									"    pm.expect(jsonData).to.have.property('Username', 'ipgTestUser');",
+									"});",
+									"",
+									"// ذخیره توکن برای استفاده در درخواست‌های بعدی",
+									"var jsonData = pm.response.json();",
+									"pm.variables.set('token', jsonData.Token);"
+								]
+							}
+						}
+					]
 				}
 			]
 		},
 		{
 			"name": "Payment",
 			"item": [
+				{
+					"name": "Payment Request (PEP)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"InvoiceNumber\": \"INV-001\",\n    \"Amount\": 1000,\n    \"TerminalCode\": \"123456\",\n    \"RedirectUrl\": \"https://your-site.com/callback\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/pep/api/payment/request",
+							"host": ["{{baseUrl}}"],
+							"path": ["pep", "api", "payment", "request"]
+						},
+						"description": "درخواست پرداخت (PEP)"
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has valid structure\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('IsSuccess', true);",
+									"    pm.expect(jsonData).to.have.property('Message');",
+									"    pm.expect(jsonData).to.have.property('Token');",
+									"});",
+									"",
+									"// ذخیره توکن برای استفاده در درخواست‌های بعدی",
+									"var jsonData = pm.response.json();",
+									"pm.variables.set('pepToken', jsonData.Token);"
+								]
+							}
+						}
+					]
+				},
+				{
+					"name": "Verify Payment (PEP)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"InvoiceNumber\": \"INV-001\",\n    \"Amount\": 1000,\n    \"TerminalCode\": \"123456\",\n    \"RedirectUrl\": \"https://your-site.com/callback\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/pep/api/payment/verify",
+							"host": ["{{baseUrl}}"],
+							"path": ["pep", "api", "payment", "verify"]
+						},
+						"description": "تایید پرداخت (PEP)"
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has valid structure\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('IsSuccess', true);",
+									"    pm.expect(jsonData).to.have.property('Message');",
+									"    pm.expect(jsonData).to.have.property('Token');",
+									"});"
+								]
+							}
+						}
+					]
+				},
 				{
 					"name": "Purchase",
 					"request": {
@@ -88,6 +197,34 @@
 					]
 				},
 				{
+					"name": "Payment Gateway",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{paymentUrl}}",
+							"host": ["{{paymentUrl}}"]
+						},
+						"description": "دسترسی به صفحه درگاه پرداخت"
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 302\", function () {",
+									"    pm.response.to.have.status(302);",
+									"});",
+									"",
+									"pm.test(\"Redirects to payment page\", function () {",
+									"    pm.expect(pm.response.headers.get('Location')).to.include('/Payment');",
+									"});"
+								]
+							}
+						}
+					]
+				},
+				{
 					"name": "Confirm Transaction",
 					"request": {
 						"method": "POST",
@@ -127,7 +264,13 @@
 									"    pm.expect(jsonData).to.have.property('Data');",
 									"    pm.expect(jsonData.Data).to.have.property('Invoice');",
 									"    pm.expect(jsonData.Data).to.have.property('ReferenceNumber');",
-									"    pm.expect(jsonData.Data).to.have.property('TrackId');"
+									"    pm.expect(jsonData.Data).to.have.property('TrackId');",
+									"});",
+									"",
+									"// ذخیره اطلاعات تراکنش برای تست‌های بعدی",
+									"var jsonData = pm.response.json();",
+									"pm.variables.set('referenceNumber', jsonData.Data.ReferenceNumber);",
+									"pm.variables.set('trackId', jsonData.Data.TrackId);"
 								]
 							}
 						}
@@ -157,7 +300,26 @@
 							"path": ["api", "payment", "verify-transactions"]
 						},
 						"description": "تاییدیه تراکنش"
-					}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has valid structure\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('ResultCode', 0);",
+									"    pm.expect(jsonData).to.have.property('ResultMsg');",
+									"    pm.expect(jsonData).to.have.property('Data');",
+									"});"
+								]
+							}
+						}
+					]
 				},
 				{
 					"name": "Verify Payment",
@@ -183,7 +345,29 @@
 							"path": ["api", "payment", "verify-payment"]
 						},
 						"description": "تاییدیه پرداخت با اطلاعات تکمیلی"
-					}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has valid structure\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('ResultCode', 0);",
+									"    pm.expect(jsonData).to.have.property('ResultMsg', 'Successful');",
+									"    pm.expect(jsonData).to.have.property('Data');",
+									"    pm.expect(jsonData.Data).to.have.property('Invoice');",
+									"    pm.expect(jsonData.Data).to.have.property('ReferenceNumber');",
+									"    pm.expect(jsonData.Data).to.have.property('TrackId');",
+									"});"
+								]
+							}
+						}
+					]
 				},
 				{
 					"name": "Reverse Transaction",
@@ -209,7 +393,25 @@
 							"path": ["api", "payment", "reverse-transactions"]
 						},
 						"description": "برگشت تراکنش"
-					}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has valid structure\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('ResultCode', 0);",
+									"    pm.expect(jsonData).to.have.property('ResultMsg', 'Successful');",
+									"});"
+								]
+							}
+						}
+					]
 				},
 				{
 					"name": "Payment Inquiry",
@@ -235,7 +437,35 @@
 							"path": ["api", "payment", "payment-inquiry"]
 						},
 						"description": "استعلام وضعیت تراکنش"
-					}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has valid structure\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('ResultCode', 0);",
+									"    pm.expect(jsonData).to.have.property('ResultMsg', 'Successful');",
+									"    pm.expect(jsonData).to.have.property('Data');",
+									"    pm.expect(jsonData.Data).to.have.property('Status', 13033);",
+									"    pm.expect(jsonData.Data).to.have.property('TrackId');",
+									"    pm.expect(jsonData.Data).to.have.property('TransactionId');",
+									"    pm.expect(jsonData.Data).to.have.property('Amount');",
+									"    pm.expect(jsonData.Data).to.have.property('CardNumber');",
+									"    pm.expect(jsonData.Data).to.have.property('Invoice');",
+									"    pm.expect(jsonData.Data).to.have.property('Url');",
+									"    pm.expect(jsonData.Data).to.have.property('ReferenceNumber');",
+									"    pm.expect(jsonData.Data).to.have.property('RequestDate');",
+									"});"
+								]
+							}
+						}
+					]
 				},
 				{
 					"name": "Payment Inquiry V2",
@@ -261,7 +491,36 @@
 							"path": ["api", "payment", "payment-inquiryv2"]
 						},
 						"description": "استعلام وضعیت تراکنش با شماره کارت هش شده"
-					}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has valid structure\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('ResultCode', 0);",
+									"    pm.expect(jsonData).to.have.property('ResultMsg', 'Successful');",
+									"    pm.expect(jsonData).to.have.property('Data');",
+									"    pm.expect(jsonData.Data).to.have.property('Status', 13029);",
+									"    pm.expect(jsonData.Data).to.have.property('TrackId');",
+									"    pm.expect(jsonData.Data).to.have.property('TransactionId');",
+									"    pm.expect(jsonData.Data).to.have.property('Amount');",
+									"    pm.expect(jsonData.Data).to.have.property('CardNumber');",
+									"    pm.expect(jsonData.Data).to.have.property('Invoice');",
+									"    pm.expect(jsonData.Data).to.have.property('Url');",
+									"    pm.expect(jsonData.Data).to.have.property('ReferenceNumber');",
+									"    pm.expect(jsonData.Data).to.have.property('RequestDate');",
+									"    pm.expect(jsonData.Data).to.have.property('HashedCardNumber');",
+									"});"
+								]
+							}
+						}
+					]
 				},
 				{
 					"name": "Refund Transaction",
@@ -287,7 +546,25 @@
 							"path": ["api", "payment", "refund-transactions"]
 						},
 						"description": "برگشت از خرید"
-					}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has valid structure\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('ResultCode', 0);",
+									"    pm.expect(jsonData).to.have.property('ResultMsg', 'Successful');",
+									"});"
+								]
+							}
+						}
+					]
 				},
 				{
 					"name": "Confirm Pin",
@@ -313,7 +590,25 @@
 							"path": ["api", "payment", "inquiry-confirm-pin"]
 						},
 						"description": "تایید رمز کارت"
-					}
+					},
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has valid structure\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('ResultCode', 0);",
+									"    pm.expect(jsonData).to.have.property('ResultMsg', 'Successful');",
+									"});"
+								]
+							}
+						}
+					]
 				}
 			]
 		}
@@ -323,14 +618,12 @@
 			"listen": "prerequest",
 			"script": {
 				"type": "text/javascript",
-				"exec": [""]
-			}
-		},
-		{
-			"listen": "test",
-			"script": {
-				"type": "text/javascript",
-				"exec": [""]
+				"exec": [
+					"// تنظیمات پیش‌فرض",
+					"if (!pm.variables.get('baseUrl')) {",
+					"    pm.variables.set('baseUrl', 'http://localhost:4000');",
+					"}"
+				]
 			}
 		}
 	],
@@ -342,7 +635,32 @@
 		},
 		{
 			"key": "token",
-			"value": "your-token-here",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "pepToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "urlId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "paymentUrl",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "referenceNumber",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "trackId",
+			"value": "",
 			"type": "string"
 		}
 	]
